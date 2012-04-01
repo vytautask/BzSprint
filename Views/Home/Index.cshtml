@@ -1,0 +1,82 @@
+﻿@model BootstrapMVC.Models.Bugs
+@{  
+    ViewBag.Title = "BzSprint pagrindinis";
+}
+<div class="hero-unit">
+    <h1>@ViewBag.WelcomeMessage</h1>
+    <p>Įrankis, skirtas planuoti, peržiūrėti ir stumdyti darbus, atliekamus viename sprinte.</p>
+	@using (Html.BeginForm("ChangeSprint", "Home", FormMethod.Get))
+ { 
+	<p>Aktyvus sprintas:  @Html.DropDownList("sprint", new SelectList(ViewBag.Sprints, ViewBag.SelectedSprint), new { onchange = "this.form.submit();" })</p>
+ }
+	<div class="row">
+		<div class="span3 offset8">
+			@Html.ActionLink("Nomalizuoti sprinto svarbas", "NormalizeImportances", null, new { @class = "btn btn-primary btn-large" })
+		</div>
+	</div>
+   
+</div>        
+<div class="container">
+	@if (TempData["InfoMessage"] != null)
+	{ 
+		<div class="alert alert-info"><strong>Atlikta.</strong> @TempData["InfoMessage"]</div>
+	}
+	@if (TempData["ErrorMessage"] != null)
+	{ 
+		<div class="alert alert-error"><strong>Klaida!</strong> @TempData["ErrorMessage"]</div>
+	}
+
+  @if (ViewBag.Bugs != null && ViewBag.Bugs.Count > 0)
+  {
+	 <h1>Suplanuoti darbai</h1>
+	 <table class="table table-striped">
+		<thead>
+			<tr>
+				<td></td>
+				<td>Bug</td>
+				<td>Pavadinimas</td>
+				<td>Prioritetas</td>
+				<td>Taškai</td>
+				<td>Svarba</td>
+				<td></td>
+			</tr>
+		</thead>
+		<tbody>
+			@{
+				long hourCount = 0;
+			}
+			@foreach (BootstrapMVC.Models.Bug bug in ViewBag.Bugs)
+   {
+				<tr>
+					<td style="width: 5%;">
+						<a href="@Url.Action("MoveDown", "Home", new { bugID = bug.ID })" class="btn"><i class="icon-chevron-down"></i></a>
+					</td>
+					<td><a href="@(ViewBag.BugZillaUrl + bug.ID)" target="_blank">#@bug.ID</a></td>
+					<td><span class="label label-info">@bug.Product</span> <span class="label">@bug.Feature</span> @bug.Title</td>
+					<td>@bug.Priority</td>
+					<td>@bug.Estimate</td>
+					<td>@bug.Importance <!-- <a href="#" class="btn btn-mini"><i class="">Keisti svarbą</i></a> --></td>
+					<td style="width: 5%;">
+						<a href="@Url.Action("MoveUp", "Home", new { bugID = bug.ID })" class="btn"><i class="icon-chevron-up"></i></a>
+					</td>
+				</tr>
+	   if (!string.IsNullOrWhiteSpace(bug.Estimate))
+	   {
+		   hourCount += long.Parse(bug.Estimate);
+	   }
+   }
+				<tr>
+					<td colspan="4">Viso bugų: @ViewBag.Bugs.Count</td>
+					<td colspan="3">Viso taškų: @hourCount</td>
+				</tr>
+		</tbody>
+	</table>
+	<div class="row">
+		<div class="span3 offset10">
+			@Html.ActionLink("Eksportuoti į CSV", "ExportCSV", null, new { @class = "btn btn-large" })
+		</div>
+	</div>
+  }
+ 
+    
+</div>
