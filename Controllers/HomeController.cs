@@ -12,7 +12,7 @@ namespace BootstrapMVC.Controllers
 {
     public class HomeController : Controller
     {
-		private Bugs _bugsModel = new Bugs();
+		private Bugs _bugsModel = null;
 
 		public Bugs BugsModel
 		{
@@ -84,6 +84,11 @@ namespace BootstrapMVC.Controllers
         {
             return View();
         }
+
+		public ActionResult Options()
+		{
+			return View();
+		}
 
 		public ActionResult MoveUp(long bugID)
 		{

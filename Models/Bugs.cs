@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Configuration;
 using System.Data.Odbc;
+using MySql.Data.MySqlClient;
 
 namespace BootstrapMVC.Models
 {
@@ -14,23 +15,27 @@ namespace BootstrapMVC.Models
 
 		}
 
+		private MySqlConnection CreateSqlConnection()
+		{
+			return new MySqlConnection(WebConfigurationManager.ConnectionStrings["BugsDB"].ConnectionString);
+		}
+
+
 		public IList<Bug> GetBugList(string sprint)
 		{
 			List<Bug> bugs = new List<Bug>();
 
-			using (OdbcConnection con = new OdbcConnection(WebConfigurationManager.ConnectionStrings["BugsDB"].ConnectionString))
+			Options options = new Options();
+
+			using (MySqlConnection con = CreateSqlConnection())
 			{
 				con.Open();
 
-				using (OdbcCommand com = new OdbcCommand("SELECT bug_id, short_desc, cf_duration, priority, CAST(cf_scrum_importance AS SIGNED INT), "
-					+ "COALESCE(cf_octopusfeature, cf_foxusfeature) as feature, products.name "
-					+ " FROM bugs inner join products on products.id = bugs.product_id "
-					+ "WHERE product_id IN (" + WebConfigurationManager.AppSettings["ProductIDs"] 
-					+ ") AND bug_status IN ('ASSIGNED', 'REOPENED') and cf_scrum_sprint = ? ORDER BY CAST(cf_scrum_importance AS SIGNED INT) desc, priority", con))
+				using (MySqlCommand com = new MySqlCommand(options.BugSelectQuery, con))
 				{
 					com.Parameters.AddWithValue("@sprintName", sprint);
 
-					using (OdbcDataReader reader = com.ExecuteReader())
+					using (MySqlDataReader reader = com.ExecuteReader())
 					{
 						while (reader.Read())
 						{
@@ -61,13 +66,13 @@ namespace BootstrapMVC.Models
 		{
 			List<string> sprints = new List<string>();
 
-			using (OdbcConnection con = new OdbcConnection(WebConfigurationManager.ConnectionStrings["BugsDB"].ConnectionString))
+			using (MySqlConnection con = CreateSqlConnection())
 			{
 				con.Open();
 
-				using (OdbcCommand com = new OdbcCommand("SELECT value FROM cf_scrum_sprint", con))
+				using (MySqlCommand com = new MySqlCommand("SELECT value FROM cf_scrum_sprint", con))
 				{
-					using (OdbcDataReader reader = com.ExecuteReader())
+					using (MySqlDataReader reader = com.ExecuteReader())
 					{
 						while (reader.Read())
 						{
@@ -84,7 +89,7 @@ namespace BootstrapMVC.Models
 
 		public void UpdateBug(Bug bug)
 		{
-			using (OdbcConnection con = new OdbcConnection(WebConfigurationManager.ConnectionStrings["BugsDB"].ConnectionString))
+			using (MySqlConnection con = CreateSqlConnection())
 			{
 				con.Open();
 
@@ -94,9 +99,9 @@ namespace BootstrapMVC.Models
 			}
 		}
 
-		private void UpdateBug(Bug bug, OdbcConnection con)
+		private void UpdateBug(Bug bug, MySqlConnection con)
 		{
-			using (OdbcCommand com = new OdbcCommand("UPDATE bugs set cf_scrum_importance = ? WHERE bug_id = ?", con))
+			using (MySqlCommand com = new MySqlCommand("UPDATE bugs set cf_scrum_importance = @importance WHERE bug_id = @bugID", con))
 			{
 				com.Parameters.AddWithValue("@importance", bug.Importance);
 				com.Parameters.AddWithValue("@bugID", bug.ID);
@@ -110,7 +115,7 @@ namespace BootstrapMVC.Models
 
 		public void BulkUpdateBugs(IList<Bug> bugs)
 		{
-			using (OdbcConnection con = new OdbcConnection(WebConfigurationManager.ConnectionStrings["BugsDB"].ConnectionString))
+			using (MySqlConnection con = CreateSqlConnection())
 			{
 				con.Open();
 

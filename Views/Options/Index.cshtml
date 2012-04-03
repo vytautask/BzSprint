@@ -1,0 +1,28 @@
+﻿@model BootstrapMVC.Models.Options
+@{
+    ViewBag.Title = "Apie";
+}
+<section id="Nustatymai">
+    <div class="page-header">
+        <h1>Options</h1>
+    </div>
+    <div class="row">
+        <div class="span12">
+            <h2>BzSprint options</h2>
+			<p>
+				@if (TempData["InfoMessage"] != null)
+				{ 
+					<div class="alert alert-info"><strong>Atlikta.</strong> @TempData["InfoMessage"]</div>
+				}
+				@using (Html.BeginForm("Update", "Options"))
+				{ 
+					@Html.LabelFor(model => model.BugSelectQuery, "Bug select query:");
+					@Html.TextAreaFor(model => model.BugSelectQuery, new { @rows = 20, style = "width:100%" });
+					
+					<input type="submit" value="Save" class="btn btn-primary" />
+				}
+			</p>
+			<br />
+        </div>
+    </div>
+</section>
