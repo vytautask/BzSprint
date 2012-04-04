@@ -3,7 +3,7 @@
 <configuration>
 	<connectionStrings>
 		<add name="BugsDB"
-			 connectionString="Driver={MySQL ODBC 5.1 Driver};Server=serverAddress;Database=bugs;User=root;Password=asdfasdfasdf;"
+			 connectionString="Server=serverAddress;Database=bugs;User=root;Password=asdfasdfasdf;"
 			 providerName="System.Data.SqlClient" />
 	</connectionStrings>
 
